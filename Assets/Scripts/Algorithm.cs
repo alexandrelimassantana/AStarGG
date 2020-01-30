@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using AstarGG.Graph;
+using UnityEngine;
 
 namespace AStarGG
 {
@@ -99,10 +100,7 @@ public class Algorithm<T, Cookie> where T : class, ILocation
         }
         else if(_state.G[node] > cost) // Found better route to node
         {
-            if(_state.Tree.Nodes.Contains(node))
-                _state.Tree.UpdateParent(node, _state.CurrentNode);
-            else
-                _state.OpenNodes[node] = new EdgeWeighted<T>(_state.CurrentNode, node);
+            _state.Tree.UpdateParent(node, _state.CurrentNode);
             _state.G[node] = cost;
         }
     }
