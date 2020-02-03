@@ -3,25 +3,22 @@ using System;
 namespace AStarGG.Test
 {
 
-public class TileSquared : ILocation 
+public class TileSquared 
 {
-    public readonly int X, Y, Cost;
+    public readonly int X, Y;
 
-    public TileSquared(int x, int y, int cost = 1)
+    public TileSquared(int x, int y)
     {
         X = x;
         Y = y;
-        Cost = cost;
     }
 
-    public int DistanceEstimation(ILocation other)
+    public int DistanceEstimation(TileSquared other)
     {
         if (other == null || GetType() != other.GetType())
             throw new InvalidOperationException("Cannot compare two locations with different implementations.");
         var otherLoc = (TileSquared) other;
         return Math.Abs(X - otherLoc.X) + Math.Abs(Y - otherLoc.Y);
     }
-    
-    public int MovementCost() => Cost;
 }
 }

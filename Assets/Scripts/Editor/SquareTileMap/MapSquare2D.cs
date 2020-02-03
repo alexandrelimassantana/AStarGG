@@ -33,6 +33,9 @@ public class MapSquare2D : IMap<TileSquared, int>
         return neighbors;
     }
 
-    public bool IsWalkable(TileSquared location, int flags) => Locations.Contains(location);
+    public int DistanceEstimation(TileSquared a, TileSquared b) =>
+        a.DistanceEstimation(b);
+
+    public int MovementCost(TileSquared a) => 1;
 }
 }

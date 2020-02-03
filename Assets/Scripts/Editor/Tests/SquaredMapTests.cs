@@ -4,69 +4,71 @@ namespace AStarGG.Test
 {
     public class SquaredMapTests
     {
-        readonly MapSquare2D World = new MapSquare2D();
-        readonly Algorithm<TileSquared, int> Algorithm = new Algorithm<TileSquared, int>();
+        readonly MapSquare2D World;
+        readonly Algorithm<TileSquared, int> Algorithm;
 
+        public SquaredMapTests()
+        {
+            World = new MapSquare2D();
+            Algorithm = new Algorithm<TileSquared, int>(World);
+        }
  
         [SetUp]
-        public void SetUp()
-        {
-            World.Locations.Clear();
-            Algorithm.Args.World = World;
-            Algorithm.Args.Cookie = 0;
-        }
+        public void SetUp() => World.Locations.Clear();
 
         [Test]
         public void OriginIsDestination()
         {
-            World.Locations.Add(new TileSquared(0,0));
-            Algorithm.Args.Origin = World.Locations[0];
-            Algorithm.Args.Destination = World.Locations[0];
+            var origin = new TileSquared(0,0);
+            World.Locations.Add(origin);
             
-            var path = Algorithm.Calculate();
+            var path = Algorithm.Calculate(origin, origin, 0);
 
             Assert.True(path.Count == 1);
-            Assert.True(path[0].Equals(Algorithm.Args.Origin));
+            Assert.True(path.Contains(origin));
         }
 
         [Test]
         public void OneStep()
         {
-            World.Locations.Add(new TileSquared(0,0));
-            World.Locations.Add(new TileSquared(0,1));
+            var origin = new TileSquared(0,0);
+            var dest = new TileSquared(0,1);
 
-            Algorithm.Args.Origin = World.Locations[0];
-            Algorithm.Args.Destination = World.Locations[1];
-            
-            var path = Algorithm.Calculate();
+            World.Locations.Add(origin);
+            World.Locations.Add(dest);
+
+            var path = Algorithm.Calculate(origin, dest, 0);
 
             Assert.True(path.Count == 2);
-            Assert.True(path[0].Equals(Algorithm.Args.Origin));
-            Assert.True(path[1].Equals(Algorithm.Args.Destination));
+            Assert.True(path[0].Equals(origin));
+            Assert.True(path[1].Equals(dest));
         }
 
         [Test]
         public void TwoSteps()
         {
-            World.Locations.Add(new TileSquared(0,0));
-            World.Locations.Add(new TileSquared(0,1));
-            World.Locations.Add(new TileSquared(0,2));
-
-            Algorithm.Args.Origin = World.Locations[0];
-            Algorithm.Args.Destination = World.Locations[2];
+            var origin = new TileSquared(0,0);
+            var dest = new TileSquared(0,2);
             
-            var path = Algorithm.Calculate();
+            World.Locations.Add(origin);
+            World.Locations.Add(new TileSquared(0,1));
+            World.Locations.Add(dest);
+
+            var path = Algorithm.Calculate(origin, dest, 0);
 
             Assert.True(path.Count == 3);
-            Assert.True(path[0].Equals(Algorithm.Args.Origin));
+            Assert.True(path[0].Equals(origin));
             Assert.True(path[1].Equals(World.Locations[1]));
-            Assert.True(path[2].Equals(Algorithm.Args.Destination));
+            Assert.True(path[2].Equals(dest));
         }
 
         [Test]
         public void CurvedPath()
         {
-            World.Locations.Add(new TileSquared(0,0));
+            var origin = new TileSquared(0,0);
+            var dest = new TileSquared(2,0);
+
+            World.Locations.Add(origin);
             World.Locations.Add(new TileSquared(0,1));
             World.Locations.Add(new TileSquared(0,2));
 
@@ -74,50 +76,43 @@ namespace AStarGG.Test
             World.Locations.Add(new TileSquared(2,2));
 
             World.Locations.Add(new TileSquared(2,1));
-            World.Locations.Add(new TileSquared(2,0));
+            World.Locations.Add(dest);
 
-            Algorithm.Args.Origin = World.Locations[0];
-            Algorithm.Args.Destination = World.Locations[6];
-            
-            var path = Algorithm.Calculate();
+            var path = Algorithm.Calculate(origin, dest, 0);
 
             Assert.True(path.Count == World.Locations.Count);
-            Assert.True(path[0].Equals(Algorithm.Args.Origin));
-            Assert.True(path[6].Equals(Algorithm.Args.Destination));
+            Assert.True(path[0].Equals(origin));
+            Assert.True(path[6].Equals(dest));
         }
 
         [Test]
         public void ShortestCurvedPath()
         {
+            var origin = new TileSquared(0,1);
+            var dest = new TileSquared(2,3);
+
             World.Locations.Add(new TileSquared(0,0));
-            World.Locations.Add(new TileSquared(0,1));
+            World.Locations.Add(origin);
             World.Locations.Add(new TileSquared(0,2));
 
-            World.Locations.Add(new TileSquared(1,2));
-            World.Locations.Add(new TileSquared(2,2));
-
-            World.Locations.Add(new TileSquared(2,1));
+            World.Locations.Add(new TileSquared(1,0));
             World.Locations.Add(new TileSquared(2,0));
+            World.Locations.Add(new TileSquared(2,1));
+            World.Locations.Add(new TileSquared(2,2));
+            World.Locations.Add(dest);
 
-            World.Locations.Add(new TileSquared(0,-1));
-            World.Locations.Add(new TileSquared(1,-1));
-            World.Locations.Add(new TileSquared(2,-1));
+            var path = Algorithm.Calculate(origin, dest, 0);
 
-            Algorithm.Args.Origin = World.Locations[0];
-            Algorithm.Args.Destination = World.Locations[6];
-            
-            var path = Algorithm.Calculate();
-
-            Assert.True(path.Count == 5);
-            Assert.True(path[0].Equals(Algorithm.Args.Origin));
-            Assert.True(path[4].Equals(Algorithm.Args.Destination));
+            Assert.True(path.Count == 7);
+            Assert.True(path[0].Equals(origin));
+            Assert.True(path[6].Equals(dest));
         }
 
         [Test]
         public void DeceptivePath()
         {
             var origin = new TileSquared(1,2);
-            var destination = new TileSquared(3,2);
+            var dest = new TileSquared(3,2);
             for(int x = 0; x < 6; x++)
                 World.Locations.Add(new TileSquared(x,0));
 
@@ -132,16 +127,13 @@ namespace AStarGG.Test
             World.Locations.Add(new TileSquared(5,1));
             World.Locations.Add(new TileSquared(5,2));
             World.Locations.Add(new TileSquared(4,2));
-            World.Locations.Add(destination);
+            World.Locations.Add(dest);
 
-            Algorithm.Args.Origin = origin;
-            Algorithm.Args.Destination = destination;
-            
-            var path = Algorithm.Calculate();
+            var path = Algorithm.Calculate(origin, dest, 0);
 
             Assert.True(path.Count == 13);
-            Assert.True(path[0].Equals(Algorithm.Args.Origin));
-            Assert.True(path[12].Equals(Algorithm.Args.Destination));
+            Assert.True(path[0].Equals(origin));
+            Assert.True(path[12].Equals(dest));
         }
     }
 }
