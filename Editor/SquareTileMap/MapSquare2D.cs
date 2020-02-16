@@ -5,18 +5,9 @@ using System.Collections.Generic;
 namespace AStarGG.Test
 {
 
-/// <summary>
-/// A map that may contain objects blocking the way of others
-/// </summary>
-/// <remarks>
-/// In this example, Heros can pass through heroes.
-/// Enemies can also pass through enemies.
-/// Selecting as destination an occupied tile is not a verification extern to AStar.
-/// </remarks>
-public class Map2dWithObjects : IMap<TileSquared, int>
+public class MapSquare2D : IMap<TileSquared, int>
 {
     public readonly List<TileSquared> Locations = new List<TileSquared>();
-    public readonly HashSet<MapObject> Objects = new HashSet<MapObject>();
 
     TileSquared Find(int x, int y) =>
         Locations.FirstOrDefault(l => l.X == x && l.Y == y);
@@ -42,6 +33,9 @@ public class Map2dWithObjects : IMap<TileSquared, int>
         return neighbors;
     }
 
-    public bool IsWalkable(TileSquared location, int flags) => Locations.Contains(location);
+    public int DistanceEstimation(TileSquared a, TileSquared b) =>
+        a.DistanceEstimation(b);
+
+    public int MovementCost(TileSquared a) => 1;
 }
 }
