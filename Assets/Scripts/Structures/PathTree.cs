@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 namespace AstarGG.Structs
 {
@@ -13,6 +14,7 @@ namespace AstarGG.Structs
             Nodes[root] = null;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Contains(T step) => Nodes.ContainsKey(step);
 
         public List<T> PathTo(T destination)

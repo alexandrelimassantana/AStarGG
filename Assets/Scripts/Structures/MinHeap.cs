@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.CompilerServices;
 
 namespace AstarGG.Structs
 {
@@ -35,6 +36,7 @@ namespace AstarGG.Structs
         public bool IsEmpty => Count == 0;
 
         /// Get the Min element
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public T Peek()
         {
             if (Count == 0)
@@ -45,6 +47,7 @@ namespace AstarGG.Structs
         }
 
         /// Add an element to the heap
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Push(T o)
         {
             if (Count == size)
@@ -58,6 +61,7 @@ namespace AstarGG.Structs
 
         /// Remove the Min element and does not reorganize
         /// This method should only be used if multiple edits in the heap are expected
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public T Pop()
         {
             var ret = Peek();
@@ -68,7 +72,8 @@ namespace AstarGG.Structs
             return ret;
         }
 
-        /// Force a sort in the structure
+        /// Force a sort in the structure. Use this when updating values.
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Sort()
         {
             for (int i = Count / 2 - 1; i >= 0; i--)
@@ -77,6 +82,7 @@ namespace AstarGG.Structs
         }
 
         /// Logically removes all elements from the heap
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Clean()
         {
             Count = 0;
@@ -85,6 +91,7 @@ namespace AstarGG.Structs
         }
 
         /// Releases the memory holded by this structure
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Clear()
         {
             Clean();
@@ -93,6 +100,7 @@ namespace AstarGG.Structs
         }
 
         /// Guarantees that enough memory will be available to contain s entries
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Reserve(int s)
         {
             if (size < s)
@@ -102,6 +110,8 @@ namespace AstarGG.Structs
         #endregion
 
         #region Private Methods
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         void Realloc(int s)
         {
             var other = new T[s];
@@ -111,6 +121,7 @@ namespace AstarGG.Structs
             size = s;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         void _Heapify(int root)
         {
             var l = 2 * root + 1;
@@ -130,7 +141,6 @@ namespace AstarGG.Structs
                 _Heapify(min);
             }
         }
-
         #endregion
     }
 }
