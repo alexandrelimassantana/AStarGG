@@ -5,25 +5,26 @@ namespace AstarGG.Structs
 {
     public class MinHeap<T>
     {
-        public delegate int Compare(T a, T b);
+        public delegate int ComparatorFn(T a, T b);
 
         #region State
+        private static readonly int BlockSize = 16;
         T[] raw; // Values
-        readonly Compare compare; // Comparator
-        int size, chunk; // Memory Attributes
+        public ComparatorFn Comparator; // Comparator
+        int size; // Memory Attributes
         bool dirty; // Dirty bit for optimized subsequent additions
 
         #endregion
 
-        public MinHeap(Compare cmp)
+        public MinHeap(ComparatorFn cmp)
         {
-            compare = cmp;
+            Comparator = cmp;
             Clean();
         }
 
-        public MinHeap(Compare cmp, int reserve)
+        public MinHeap(ComparatorFn cmp, int reserve)
         {
-            compare = cmp;
+            Comparator = cmp;
             Reserve(reserve);
         }
 
@@ -51,10 +52,7 @@ namespace AstarGG.Structs
         public void Push(T o)
         {
             if (Count == size)
-            {
-                Realloc(size + chunk);
-                chunk <<= 1;
-            }
+                Realloc(size + BlockSize);
             dirty = true;
             raw[Count++] = o;
         }
@@ -86,7 +84,6 @@ namespace AstarGG.Structs
         public void Clean()
         {
             Count = 0;
-            chunk = 8;
             dirty = false;
         }
 
@@ -128,9 +125,9 @@ namespace AstarGG.Structs
             var r = 2 * root + 2;
             var min = root;
 
-            if (l < Count && compare(raw[l], raw[min]) < 0)
+            if (l < Count && Comparator(raw[l], raw[min]) < 0)
                 min = l;
-            if (r < Count && compare(raw[r], raw[min]) < 0)
+            if (r < Count && Comparator(raw[r], raw[min]) < 0)
                 min = r;
 
             if (min != root)

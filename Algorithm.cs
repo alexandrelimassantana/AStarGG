@@ -40,16 +40,27 @@ namespace AStarGG
         {
             this.world = world;
             nodes = new Dictionary<T, Step>();
-            minheap = new MinHeap<T>((a,b) => Heuristic(b) - Heuristic(a));
+            minheap = new MinHeap<T>(null);
         }
 
-        public List<T> Calculate(T start, T end, Cookie c) 
+        public List<T> PathToPoint(T start, T end, Cookie c, int cutoff = -1) 
         {
             SetUp(start, end);
-            UpdateOrOpenNeighbor(c);
+            minheap.Comparator = (a,b) => Heuristic(b) - Heuristic(a);
+            UpdateOrOpenNeighbor(c, cutoff);
             while (!minheap.IsEmpty && !tree.Contains(end))
-                MainLoop(c);
+                MainLoop(c, cutoff);
             return tree.PathTo(end); // Path or null if end not it tree
+        }
+
+        public PathTree<T> PathsFromPoint(T start, Cookie c, int cutoff = -1) 
+        {
+            SetUp(start);
+            minheap.Comparator = (a,b) => nodes[b].Cost - nodes[a].Cost;
+            UpdateOrOpenNeighbor(c, cutoff);
+            while (!minheap.IsEmpty)
+                MainLoop(c, cutoff);
+            return tree;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -64,9 +75,12 @@ namespace AStarGG
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        void UpdateOrOpenNeighbor(Cookie c)
+        void UpdateOrOpenNeighbor(Cookie c, int cutoff)
         {
             var cost = nodes[current].Cost + world.MovementCost(current);
+            // If cannot cover more distance than the cutoff
+            if(cutoff >= 0 && cost > cutoff)
+                return;
             foreach (var n in world.NeighborsOf(current, c))
             {
                 // First time checking this node
@@ -79,7 +93,7 @@ namespace AStarGG
                 else if (nodes[n].Cost > cost)
                 {
                     if(tree.Contains(n))
-                        tree.Nodes[n] = current;
+                        tree.ParentOf[n] = current;
                     nodes[n].Update(current, cost);
                     minheap.Sort();
                 }
@@ -87,11 +101,11 @@ namespace AStarGG
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        void MainLoop(Cookie c)
+        void MainLoop(Cookie c, int cutoff)
         {
             current = minheap.Pop();
-            tree.Nodes[current] = nodes[current].Parent;
-            UpdateOrOpenNeighbor(c);
+            tree.ParentOf[current] = nodes[current].Parent;
+            UpdateOrOpenNeighbor(c, cutoff);
         }
 
 
